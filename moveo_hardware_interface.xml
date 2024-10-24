@@ -1,0 +1,8 @@
+<library path="libmoveo_hardware_interface">
+    <class name="moveo_hardware_interface/MoveoHardwareInterface"
+           type="moveo_hardware_interface::MoveoHardwareInterface"
+           base_class_type="hardware_interface::SystemInterface">
+      <description>Moveo BCN3D hardware interface</description>
+    </class>
+  </library>
+  

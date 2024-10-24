@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>moveo_hardware_interface</name>
+  <version>0.0.0</version>
+  <description>Hardware interface for Moveo BCN3D robot arm</description>
+
+  <maintainer email="almog6790@gmail.com">almog</maintainer>
+  <license>TODO: License declaration</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>hardware_interface</depend>
+  <depend>pluginlib</depend>
+  <depend>serial</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+    <pluginlib plugin="${prefix}/moveo_hardware_interface.xml"/>
+  </export>
+</package>
