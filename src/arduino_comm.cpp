@@ -64,12 +64,11 @@ int ArduinoComm::sendCommands(const std::vector<double> & positions, const std::
   }
 
   std::stringstream command;
-  command << "SET ";
-  for (size_t i = 0; i < positions.size(); ++i)
+  for (size_t i = 0; i < 6; ++i)
   {
-    command << positions[i] << " " << velocities[i] << " ";
+    command << "Joint_" << (i + 1) << " position " << positions[i] 
+            << " velocity " << velocities[i] << "\n";
   }
-  command << "\n";
 
   try
   {
@@ -92,13 +91,40 @@ int ArduinoComm::readStates(std::vector<double> & positions, std::vector<double>
     return -1;  // Error code for not connected
   }
 
+  // Send the read request to Arduino
   try
   {
-    std::string response = serial_port_.readline(1024, "\n");
-    std::stringstream ss(response);
-    for (size_t i = 0; i < positions.size(); ++i)
+    serial_port_.write("READ_STATES\n");
+  }
+  catch (const serial::IOException & e)
+  {
+    std::cerr << "Error sending read request: " << e.what() << std::endl;
+    return -1;  // Error code for write failure
+  }
+
+  // Read the response for each joint
+  try
+  {
+    for (size_t i = 0; i < 6; ++i)
     {
-      ss >> positions[i] >> velocities[i];
+      std::string response = serial_port_.readline(1024, "\n");
+      std::stringstream ss(response);
+      std::string joint_name, curr_pos_str, curr_vel_str;
+      double curr_pos, curr_vel;
+
+      ss >> joint_name >> curr_pos_str >> curr_pos >> curr_vel_str >> curr_vel;
+      
+      // Ensure we have expected keywords
+      if (curr_pos_str == "curr_pos" && curr_vel_str == "curr_vel")
+      {
+        positions[i] = curr_pos;
+        velocities[i] = curr_vel;
+      }
+      else
+      {
+        std::cerr << "Unexpected response format: " << response << std::endl;
+        return -1;  // Error code for incorrect format
+      }
     }
   }
   catch (const serial::IOException & e)
@@ -109,4 +135,3 @@ int ArduinoComm::readStates(std::vector<double> & positions, std::vector<double>
 
   return 0;  // Success code
 }
-

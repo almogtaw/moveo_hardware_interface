@@ -12,6 +12,8 @@ namespace moveo_hardware_interface
 class MoveoHardwareInterface : public hardware_interface::SystemInterface
 {
 public:
+  RCLCPP_SHARED_PTR_DEFINITIONS(MoveoHardwareInterface);
+
   MOVEO_HARDWARE_INTERFACE_PUBLIC
   hardware_interface::return_type on_init(const hardware_interface::HardwareInfo & system_info) override;
 
@@ -40,6 +42,7 @@ public:
   hardware_interface::return_type write() override;
 
 private:
+  std::vector<std::string> joint_names_;
   std::vector<double> position_commands_;
   std::vector<double> velocity_commands_;
   std::vector<double> position_states_;
