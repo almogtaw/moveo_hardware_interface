@@ -77,7 +77,7 @@ int ArduinoComm::sendCommands(const std::vector<double>& positions, const std::v
     command << "Joint_" << (i + 1) << " position " << positions[i]
             << " velocity " << velocities[i] << "\n";
 
-    std::cout << "[sendCommands] sending command: " << command.str() << std::endl;
+    // std::cout << "[sendCommands] sending command: " << command.str() << std::endl;
 
     // Send command and wait for response
     auto response = send_msg(command.str());
@@ -85,7 +85,7 @@ int ArduinoComm::sendCommands(const std::vector<double>& positions, const std::v
       std::cerr << "No response from Arduino after sending command for Joint_" << (i + 1) << "." << std::endl;
       return -1;  // Exit if any command fails
     }
-    std::cout << "[sendCommands] response:" << response << std::endl;
+    // std::cout << "[sendCommands] response:" << response << std::endl;
   }
   return 0;  // Success code
 }
@@ -97,26 +97,39 @@ int ArduinoComm::readStates(std::vector<double>& positions, std::vector<double>&
     return -1;
   }
 
-  // Request joint states from Arduino
-  auto response = send_msg("READ_STATES");
-  if (response.empty()) {
-    std::cerr << "No response from Arduino for state request." << std::endl;
-    return -1;
-  }
+  for (size_t i = 0; i < positions.size(); ++i) 
+  {
+    // Send a request for each joint state individually
+    std::stringstream command;
+    command << "READ_STATE Joint_" << (i + 1) << "\n";
+    
+    // Send the command to Arduino and wait for the response
+    auto response = send_msg(command.str());
+    if (response.empty()) 
+    {
+      std::cerr << "No response from Arduino for Joint_" << (i + 1) << " state request." << std::endl;
+      return -1;  // Exit if any command fails
+    }
 
-  std::stringstream ss(response);
-  std::string joint_name, curr_pos_str, curr_vel_str;
-  double curr_pos, curr_vel;
+    // std::cout << "[readStates] received response for Joint_" << (i + 1) << ": " << response << std::endl;
 
-  for (size_t i = 0; i < positions.size(); ++i) {
+    // Parse the response for current position and velocity
+    std::stringstream ss(response);
+    std::string joint_name, curr_pos_str, curr_vel_str;
+    double curr_pos, curr_vel;
+
     ss >> joint_name >> curr_pos_str >> curr_pos >> curr_vel_str >> curr_vel;
-    if (curr_pos_str == "curr_pos" && curr_vel_str == "curr_vel") {
+    if (curr_pos_str == "curr_pos" && curr_vel_str == "curr_vel") 
+    {
       positions[i] = curr_pos;
       velocities[i] = curr_vel;
-    } else {
+    } 
+    else 
+    {
       std::cerr << "Unexpected format in Arduino response: " << response << std::endl;
-      return -1;
+      return -1;  // Error code for unexpected format
     }
   }
-  return 0;
+  return 0;  // Success code
 }
+

@@ -1,4 +1,4 @@
-<library path="libmoveo_hardware_interface">
+<library path="moveo_hardware_interface">
     <class name="moveo_hardware_interface/MoveoHardwareInterface"
            type="moveo_hardware_interface::MoveoHardwareInterface"
            base_class_type="hardware_interface::SystemInterface">
