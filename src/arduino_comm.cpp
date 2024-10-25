@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
+#include <thread>
+#include <chrono>
 
 ArduinoComm::ArduinoComm() {}
 
@@ -21,6 +23,7 @@ int ArduinoComm::connect()
       serial_conn_.Open("/dev/ttyUSB0");
       serial_conn_.SetBaudRate(LibSerial::BaudRate::BAUD_57600);
       serial_conn_.FlushIOBuffers();  // Clear old data
+      std::this_thread::sleep_for(std::chrono::seconds(2));
       std::cout << "Serial connection established!" << std::endl;
       return 0;
   } catch (const LibSerial::OpenFailed&) {
