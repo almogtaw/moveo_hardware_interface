@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <string>
-#include <serial/serial.h>  // Serial communication library
+#include <libserial/SerialPort.h>  // Serial communication library
 
 class ArduinoComm
 {
@@ -18,7 +18,7 @@ public:
   int readStates(std::vector<double> & positions, std::vector<double> & velocities);  // Read state data
 
 private:
-  serial::Serial serial_port_;
+  LibSerial::SerialPort serial_stream_;
 };
 
 #endif  // ARDUINO_COMM_HPP_

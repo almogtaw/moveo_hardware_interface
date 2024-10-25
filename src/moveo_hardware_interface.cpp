@@ -1,4 +1,4 @@
-#include "moveo_hardware_interface.hpp"
+#include "moveo_hardware_interface/moveo_hardware_interface.hpp"
 #include "rclcpp/rclcpp.hpp"
 
 namespace moveo_hardware_interface

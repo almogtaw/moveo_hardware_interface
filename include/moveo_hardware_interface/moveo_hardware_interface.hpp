@@ -1,11 +1,13 @@
 #ifndef MOVEO_HARDWARE_INTERFACE__MOVEO_HARDWARE_INTERFACE_HPP_
 #define MOVEO_HARDWARE_INTERFACE__MOVEO_HARDWARE_INTERFACE_HPP_
 
-#include "hardware_interface/system_interface.hpp"
 #include "hardware_interface/handle.hpp"
+#include "hardware_interface/hardware_info.hpp"
+#include "hardware_interface/system_interface.hpp"
+#include "hardware_interface/types/hardware_interface_return_values.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "visibility_control.h"
-#include "arduino_comm.hpp"
+#include "moveo_hardware_interface/visibility_control.h"
+#include "moveo_hardware_interface/arduino_comm.hpp"
 
 namespace moveo_hardware_interface
 {
