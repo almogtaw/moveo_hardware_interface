@@ -1,19 +1,40 @@
 #include "moveo_hardware_interface.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include <vector>
 
 namespace moveo_hardware_interface
 {
-hardware_interface::return_type MoveoHardwareInterface::configure(const hardware_interface::HardwareInfo & system_info)
+
+hardware_interface::return_type MoveoHardwareInterface::on_init(const hardware_interface::HardwareInfo & system_info)
 {
   position_commands_.resize(6, 0.0);
   velocity_commands_.resize(6, 0.0);
   position_states_.resize(6, 0.0);
   velocity_states_.resize(6, 0.0);
 
-  // Initialize Arduino communication
-  arduino_.connect();
+  RCLCPP_INFO(rclcpp::get_logger("MoveoHardwareInterface"), "Moveo hardware interface initialized.");
 
+  return hardware_interface::return_type::OK;
+}
+
+hardware_interface::return_type MoveoHardwareInterface::on_configure(const rclcpp_lifecycle::State &)
+{
+  arduino_.connect();
+  return hardware_interface::return_type::OK;
+}
+
+hardware_interface::return_type MoveoHardwareInterface::on_cleanup(const rclcpp_lifecycle::State &)
+{
+  arduino_.disconnect();
+  return hardware_interface::return_type::OK;
+}
+
+hardware_interface::return_type MoveoHardwareInterface::on_activate(const rclcpp_lifecycle::State &)
+{
+  return hardware_interface::return_type::OK;
+}
+
+hardware_interface::return_type MoveoHardwareInterface::on_deactivate(const rclcpp_lifecycle::State &)
+{
   return hardware_interface::return_type::OK;
 }
 
@@ -43,27 +64,26 @@ std::vector<hardware_interface::CommandInterface> MoveoHardwareInterface::export
   return command_interfaces;
 }
 
-hardware_interface::return_type MoveoHardwareInterface::start()
-{
-  return hardware_interface::return_type::OK;
-}
-
-hardware_interface::return_type MoveoHardwareInterface::stop()
-{
-  return hardware_interface::return_type::OK;
-}
-
 hardware_interface::return_type MoveoHardwareInterface::read()
 {
   // Receive state data from Arduino
-  arduino_.readStates(position_states_, velocity_states_);
+  if (arduino_.readStates(position_states_, velocity_states_) != 0)
+  {
+    RCLCPP_ERROR(rclcpp::get_logger("MoveoHardwareInterface"), "Error reading from Arduino.");
+    return hardware_interface::return_type::ERROR;
+  }
   return hardware_interface::return_type::OK;
 }
 
 hardware_interface::return_type MoveoHardwareInterface::write()
 {
   // Send commands to Arduino
-  arduino_.sendCommands(position_commands_, velocity_commands_);
+  if (arduino_.sendCommands(position_commands_, velocity_commands_) != 0)
+  {
+    RCLCPP_ERROR(rclcpp::get_logger("MoveoHardwareInterface"), "Error writing to Arduino.");
+    return hardware_interface::return_type::ERROR;
+  }
   return hardware_interface::return_type::OK;
 }
+
 }  // namespace moveo_hardware_interface

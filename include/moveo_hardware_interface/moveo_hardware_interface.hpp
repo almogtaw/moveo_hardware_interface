@@ -5,7 +5,7 @@
 #include "hardware_interface/handle.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "visibility_control.h"
-#include "arduino_comm.hpp"  // Include the Arduino communication code
+#include "arduino_comm.hpp"
 
 namespace moveo_hardware_interface
 {
@@ -13,19 +13,25 @@ class MoveoHardwareInterface : public hardware_interface::SystemInterface
 {
 public:
   MOVEO_HARDWARE_INTERFACE_PUBLIC
-  hardware_interface::return_type configure(const hardware_interface::HardwareInfo & system_info) override;
+  hardware_interface::return_type on_init(const hardware_interface::HardwareInfo & system_info) override;
+
+  MOVEO_HARDWARE_INTERFACE_PUBLIC
+  hardware_interface::return_type on_configure(const rclcpp_lifecycle::State & previous_state) override;
+
+  MOVEO_HARDWARE_INTERFACE_PUBLIC
+  hardware_interface::return_type on_cleanup(const rclcpp_lifecycle::State & previous_state) override;
+
+  MOVEO_HARDWARE_INTERFACE_PUBLIC
+  hardware_interface::return_type on_activate(const rclcpp_lifecycle::State & previous_state) override;
+
+  MOVEO_HARDWARE_INTERFACE_PUBLIC
+  hardware_interface::return_type on_deactivate(const rclcpp_lifecycle::State & previous_state) override;
 
   MOVEO_HARDWARE_INTERFACE_PUBLIC
   std::vector<hardware_interface::StateInterface> export_state_interfaces() override;
 
   MOVEO_HARDWARE_INTERFACE_PUBLIC
   std::vector<hardware_interface::CommandInterface> export_command_interfaces() override;
-
-  MOVEO_HARDWARE_INTERFACE_PUBLIC
-  hardware_interface::return_type start() override;
-
-  MOVEO_HARDWARE_INTERFACE_PUBLIC
-  hardware_interface::return_type stop() override;
 
   MOVEO_HARDWARE_INTERFACE_PUBLIC
   hardware_interface::return_type read() override;

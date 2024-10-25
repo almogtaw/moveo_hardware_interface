@@ -8,11 +8,14 @@
 class ArduinoComm
 {
 public:
-  ArduinoComm() = default;
+  ArduinoComm();
+  ~ArduinoComm();
 
-  void connect();
-  void sendCommands(const std::vector<double> & positions, const std::vector<double> & velocities);
-  void readStates(std::vector<double> & positions, std::vector<double> & velocities);
+  int connect();  // Establish the serial connection
+  void disconnect();  // Close the serial connection
+  bool isConnected() const;
+  int sendCommands(const std::vector<double> & positions, const std::vector<double> & velocities);  // Send command data
+  int readStates(std::vector<double> & positions, std::vector<double> & velocities);  // Read state data
 
 private:
   serial::Serial serial_port_;
