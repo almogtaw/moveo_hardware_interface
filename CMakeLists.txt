@@ -49,7 +49,7 @@ pluginlib_export_plugin_description_file(hardware_interface moveo_hardware_inter
 
 # INSTALL
 install(
-  DIRECTORY hardware/include/
+  DIRECTORY include/
   DESTINATION include/moveo_hardware_interface
 )
 # install(

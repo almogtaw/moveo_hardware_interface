@@ -28,32 +28,32 @@ hardware_interface::CallbackReturn MoveoHardwareInterface::on_init(const hardwar
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
-hardware_interface::return_type MoveoHardwareInterface::on_configure(const rclcpp_lifecycle::State &)
+hardware_interface::CallbackReturn MoveoHardwareInterface::on_configure(const rclcpp_lifecycle::State &)
 {
   if (arduino_.connect() != 0)
   {
     RCLCPP_ERROR(rclcpp::get_logger("MoveoHardwareInterface"), "Failed to connect to Arduino.");
-    return hardware_interface::return_type::ERROR;
+    return hardware_interface::CallbackReturn::ERROR;
   }
-  return hardware_interface::return_type::OK;
+  return hardware_interface::CallbackReturn::SUCCESS;
 }
 
-hardware_interface::return_type MoveoHardwareInterface::on_cleanup(const rclcpp_lifecycle::State &)
+hardware_interface::CallbackReturn MoveoHardwareInterface::on_cleanup(const rclcpp_lifecycle::State &)
 {
   arduino_.disconnect();
-  return hardware_interface::return_type::OK;
+  return hardware_interface::CallbackReturn::SUCCESS;
 }
 
-hardware_interface::return_type MoveoHardwareInterface::on_activate(const rclcpp_lifecycle::State &)
+hardware_interface::CallbackReturn MoveoHardwareInterface::on_activate(const rclcpp_lifecycle::State &)
 {
-    // add stepper motors enable 
-  return hardware_interface::return_type::OK;
+    // add stepper motors enable
+  return hardware_interface::CallbackReturn::SUCCESS;
 }
 
-hardware_interface::return_type MoveoHardwareInterface::on_deactivate(const rclcpp_lifecycle::State &)
+hardware_interface::CallbackReturn MoveoHardwareInterface::on_deactivate(const rclcpp_lifecycle::State &)
 {
     // add stepper motors disable
-  return hardware_interface::return_type::OK;
+  return hardware_interface::CallbackReturn::SUCCESS;
 }
 
 std::vector<hardware_interface::StateInterface> MoveoHardwareInterface::export_state_interfaces()
@@ -82,7 +82,7 @@ std::vector<hardware_interface::CommandInterface> MoveoHardwareInterface::export
   return command_interfaces;
 }
 
-hardware_interface::return_type MoveoHardwareInterface::read()
+hardware_interface::return_type MoveoHardwareInterface::read(const rclcpp::Time &, const rclcpp::Duration &)
 {
   if (!arduino_.isConnected())
   {
@@ -100,7 +100,7 @@ hardware_interface::return_type MoveoHardwareInterface::read()
   return hardware_interface::return_type::OK;
 }
 
-hardware_interface::return_type MoveoHardwareInterface::write()
+hardware_interface::return_type MoveoHardwareInterface::write(const rclcpp::Time &, const rclcpp::Duration &)
 {
   if (!arduino_.isConnected())
   {

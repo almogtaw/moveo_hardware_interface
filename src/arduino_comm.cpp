@@ -58,7 +58,7 @@ int ArduinoComm::sendCommands(const std::vector<double>& positions, const std::v
 
   try
   {
-    serial_stream_ << command.str();
+    serial_stream_.Write(command.str());
   }
   catch (const std::runtime_error& e)
   {
@@ -80,13 +80,13 @@ int ArduinoComm::readStates(std::vector<double>& positions, std::vector<double>&
   try
   {
     // Send the read request to Arduino
-    serial_stream_ << "READ_STATES\n";
+    serial_stream_.Write("READ_STATES\n");
 
     // Read the response for each joint
     for (size_t i = 0; i < positions.size(); ++i)
     {
       std::string response;
-      std::getline(serial_stream_, response);
+      serial_stream_.ReadLine(response, '\n');
 
       std::stringstream ss(response);
       std::string joint_name, curr_pos_str, curr_vel_str;
