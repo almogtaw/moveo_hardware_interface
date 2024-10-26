@@ -92,6 +92,8 @@ AccelStepper* joints[] = {&joint1, &joint2, &joint3, &joint4, &joint5};
 long joint_positions[NUM_JOINTS] = {0, 0, 0, 0, 0};
 long joint_velocities[NUM_JOINTS] = {0, 0, 0, 0, 0};
 
+// Control mode flag for all joints
+bool is_position_control = true;
 
 void setup() 
 {
@@ -146,6 +148,7 @@ void setup()
   digitalWrite(13, 1); // Toggle LED to indicate setup is complete
 }
 
+
 void loop() 
 {
   if (Serial.available() > 0) 
@@ -157,44 +160,63 @@ void loop()
     {
       int joint_num;
       long position, velocity;
-      
-      // Parse the command in the format: Joint_<joint #> position <position> velocity <velocity>
-      int parsed_items = sscanf(command.c_str(), "Joint_%d position %ld velocity %ld", &joint_num, &position, &velocity);
 
-      if (parsed_items == 3 && joint_num >= 1 && joint_num <= NUM_JOINTS) 
+      // Check for position and velocity control
+      if (sscanf(command.c_str(), "Joint_%d position %ld velocity %ld", &joint_num, &position, &velocity) == 3 && joint_num >= 1 && joint_num <= NUM_JOINTS) 
       {
-        // Update the joint with new position and velocity
         int joint_index = joint_num - 1;
-        joints[joint_index]->setMaxSpeed(100);
+        joints[joint_index]->setMaxSpeed(velocity);
         joints[joint_index]->moveTo(position);
+        is_position_control = true;
 
-        // Acknowledge the command
         Serial.print("Command received for Joint_");
         Serial.print(joint_num);
         Serial.print(" position set to ");
         Serial.print(position);
+        Serial.print(" and velocity set to ");
+        Serial.println(velocity);
+      }
+      // Check for position control only
+      else if (sscanf(command.c_str(), "Joint_%d position %ld", &joint_num, &position) == 2 && joint_num >= 1 && joint_num <= NUM_JOINTS) 
+      {
+        int joint_index = joint_num - 1;
+        // Need to add default velocity here - in case the previous setMaxSpeed not in the desired value
+        joints[joint_index]->moveTo(position);
+        is_position_control = true;
+
+        Serial.print("Command received for Joint_");
+        Serial.print(joint_num);
+        Serial.print(" position set to ");
+        Serial.println(position);
+      }
+      // Check for velocity control only
+      else if (sscanf(command.c_str(), "Joint_%d velocity %ld", &joint_num, &velocity) == 2 && joint_num >= 1 && joint_num <= NUM_JOINTS) 
+      {
+        int joint_index = joint_num - 1;
+        joints[joint_index]->setSpeed(velocity);
+        is_position_control = false;
+
+        Serial.print("Command received for Joint_");
+        Serial.print(joint_num);
         Serial.print(" velocity set to ");
         Serial.println(velocity);
       }
-    } 
+      else 
+      {
+        Serial.println("Unknown joint command format received");
+      }
+    }
     else if (command.startsWith("READ_STATE")) 
     {
       int joint_num;
-      
-      // Parse the state request in the format: READ_STATE Joint_<joint #>
-      int parsed_items = sscanf(command.c_str(), "READ_STATE Joint_%d", &joint_num);
-
-      if (parsed_items == 1 && joint_num >= 1 && joint_num <= NUM_JOINTS) 
+      if (sscanf(command.c_str(), "READ_STATE Joint_%d", &joint_num) == 1 && joint_num >= 1 && joint_num <= NUM_JOINTS) 
       {
-        // Retrieve and send the current state of the requested joint
         int joint_index = joint_num - 1;
         long current_position = joints[joint_index]->currentPosition();
         long current_velocity = joints[joint_index]->speed();
 
         if (current_position == joint_positions[joint_index])
-        {
           current_velocity = 0;
-        }
 
         Serial.print("Joint_");
         Serial.print(joint_num);
@@ -203,7 +225,6 @@ void loop()
         Serial.print(" curr_vel ");
         Serial.println(current_velocity);
 
-        // Store the last position and velocity commands
         joint_positions[joint_index] = current_position;
         joint_velocities[joint_index] = current_velocity;
       } 
@@ -214,12 +235,13 @@ void loop()
     }
     else if (command.startsWith("GRIP ")) 
     {
-      // Handle gripper command
       int angle;
-      sscanf(command.c_str(), "GRIP %d", &angle);
-      gripper.write(angle); // Set servo angle
-      Serial.print("Gripper angle set to ");
-      Serial.println(angle);
+      if (sscanf(command.c_str(), "GRIP %d", &angle) == 1) 
+      {
+        gripper.write(angle);
+        Serial.print("Gripper angle set to ");
+        Serial.println(angle);
+      }
     } 
     else 
     {
@@ -227,9 +249,17 @@ void loop()
     }
   }
 
-  // Run steppers to their target positions
+  // Run steppers based on the global control mode flag
   for (int i = 0; i < NUM_JOINTS; ++i) 
   {
-    joints[i]->run();
+    if (is_position_control) 
+    {
+      joints[i]->run();
+    } 
+    else 
+    {
+      joints[i]->runSpeed();
+    }
   }
 }
+
