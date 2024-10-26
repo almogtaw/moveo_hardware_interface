@@ -25,7 +25,10 @@ public:
 
 private:
   LibSerial::SerialPort serial_conn_;
-  int timeout_ms_ = 1000; 
+  int timeout_ms_ = 1000;
+
+  // Conversion constants for each joint, representing steps per radian
+  const float steps_per_rad[5] = {1500.0, 1500.0, 900.0, 1.0, 1800.0}; 
 };
 
 #endif  // ARDUINO_COMM_HPP_
