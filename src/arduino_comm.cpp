@@ -65,37 +65,52 @@ std::string ArduinoComm::send_msg(const std::string &msg_to_send)
   return response;
 }
 
-// Send position and velocity commands
+// Send both position and velocity commands
 int ArduinoComm::sendCommands(const std::vector<double>& positions, const std::vector<double>& velocities) 
 {
   if (!isConnected()) {
     std::cerr << "Attempted to send commands, but not connected to Arduino." << std::endl;
-  return -1;  // Error code for not connected
+    return -1;  // Error code for not connected
   }
 
   for (size_t i = 0; i < positions.size(); ++i) 
   {
-    // Convert radians to steps
-    // long position_steps = static_cast<long>(positions[i] * steps_per_rad[i]);
-    // long velocity_steps = static_cast<long>(velocities[i] * steps_per_rad[i]);
-
-    // Create command for each joint
     std::stringstream command;
-    command << "Joint_" << (i + 1) << " position " << positions[i]
-            << " velocity " << velocities[i] << "\n";
+    command << "Joint_" << (i + 1) << " position " << positions[i] << " velocity " << velocities[i] << "\n";
 
-    // std::cout << "[sendCommands] sending command: " << command.str() << std::endl;
-
-    // Send command and wait for response
+    // Send command and check response
     auto response = send_msg(command.str());
     if (response.empty()) {
       std::cerr << "No response from Arduino after sending command for Joint_" << (i + 1) << "." << std::endl;
       return -1;  // Exit if any command fails
     }
-    // std::cout << "[sendCommands] response:" << response << std::endl;
   }
   return 0;  // Success code
 }
+
+// Send only velocity commands
+int ArduinoComm::sendCommands(const std::vector<double>& velocities) 
+{
+  if (!isConnected()) {
+    std::cerr << "Attempted to send commands, but not connected to Arduino." << std::endl;
+    return -1;  // Error code for not connected
+  }
+
+  for (size_t i = 0; i < velocities.size(); ++i) 
+  {
+    std::stringstream command;
+    command << "Joint_" << (i + 1) << " velocity " << velocities[i] << "\n";
+
+    // Send command and check response
+    auto response = send_msg(command.str());
+    if (response.empty()) {
+      std::cerr << "No response from Arduino after sending velocity command for Joint_" << (i + 1) << "." << std::endl;
+      return -1;  // Exit if any command fails
+    }
+  }
+  return 0;  // Success code
+}
+
 
 int ArduinoComm::readStates(std::vector<double>& positions, std::vector<double>& velocities) 
 {

@@ -19,6 +19,7 @@ public:
 
   // Sends position and velocity commands for each joint
   int sendCommands(const std::vector<double>& positions, const std::vector<double>& velocities);
+  int sendCommands(const std::vector<double>& velocities);
 
   // Reads the current position and velocity of each joint
   int readStates(std::vector<double>& positions, std::vector<double>& velocities);
