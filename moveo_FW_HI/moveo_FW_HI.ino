@@ -178,7 +178,14 @@ void loop()
       else if (sscanf(command.c_str(), "Joint_%d velocity %ld", &joint_num, &velocity) == 2 && joint_num >= 1 && joint_num <= NUM_JOINTS) 
       {
         int joint_index = joint_num - 1;
-        velocity = constrain(velocity, (long)joints_params[joint_index]->min_vel, (long)joints_params[joint_index]->max_vel);
+        if (velocity > (long)joints_params[joint_index]->max_vel)
+        {
+          velocity = (long)joints_params[joint_index]->max_vel;
+        }
+        else if (velocity < (long)joints_params[joint_index]->min_vel)
+        {
+          velocity < (long)joints_params[joint_index]->min_vel;
+        }
 
         joints[joint_index]->setSpeed(velocity);
         is_position_control = false;
@@ -257,47 +264,47 @@ void loop()
     else 
     {
       // Only proceed if the motor is active
-    if (joints[i]->isRunning()) 
-    {
-      long current_position = joints[i]->currentPosition();
-      float current_velocity = joints[i]->speed();
-
-      float deceleration = joints_params[i]->max_accel;
-      Serial.print("Joint: ");
-      Serial.print(i + 1);
-      Serial.print(" -> position: ");
-      Serial.print(current_position);
-      Serial.print(", speed: ");
-      Serial.print(current_velocity);
-      Serial.print(", max accel: ");
-      Serial.print(deceleration);
-
-      // Calculate stopping distance: d = v^2 / (2 * a)
-      long stopping_distance = (current_velocity * current_velocity) / (2 * deceleration);
-      Serial.print(", stopping distance: ");
-      Serial.println(stopping_distance);
-
-      // Check if moving toward max limit and will exceed it
-      if (current_velocity > 0 && (current_position + stopping_distance) >= joints_params[i]->max_travel) 
+      if (joints[i]->isRunning()) 
       {
-        Serial.println("stopping motor!");
-        joints[i]->moveTo(joints_params[i]->max_travel);
-        is_position_control = true;
-        // joints[i]->stop();  // Smoothly stop the motor if moving toward the max limit
+        long current_position = joints[i]->currentPosition();
+        float current_velocity = joints[i]->speed();
+
+        float deceleration = joints_params[i]->max_accel;
+        Serial.print("Joint: ");
+        Serial.print(i + 1);
+        Serial.print(" -> position: ");
+        Serial.print(current_position);
+        Serial.print(", speed: ");
+        Serial.print(current_velocity);
+        Serial.print(", max accel: ");
+        Serial.print(deceleration);
+
+        // Calculate stopping distance: d = v^2 / (2 * a)
+        long stopping_distance = (current_velocity * current_velocity) / (2 * deceleration);
+        Serial.print(", stopping distance: ");
+        Serial.println(stopping_distance);
+
+        // Check if moving toward max limit and will exceed it
+        if (current_velocity > 0 && (current_position + stopping_distance) >= joints_params[i]->max_travel) 
+        {
+          Serial.println("stopping motor!");
+          joints[i]->moveTo(joints_params[i]->max_travel);
+          is_position_control = true;
+          // joints[i]->stop();  // Smoothly stop the motor if moving toward the max limit
+        }
+        // Check if moving toward min limit and will exceed it
+        else if (current_velocity < 0 && (current_position - stopping_distance) <= joints_params[i]->min_travel) 
+        {
+          Serial.println("stopping motor!");
+          joints[i]->moveTo(joints_params[i]->min_travel);
+          is_position_control = true;
+          // joints[i]->stop();  // Smoothly stop the motor if moving toward the min limit
+        }
+        else 
+        {
+          joints[i]->runSpeed();
+        }
       }
-      // Check if moving toward min limit and will exceed it
-      else if (current_velocity < 0 && (current_position - stopping_distance) <= joints_params[i]->min_travel) 
-      {
-        Serial.println("stopping motor!");
-        joints[i]->moveTo(joints_params[i]->min_travel);
-        is_position_control = true;
-        // joints[i]->stop();  // Smoothly stop the motor if moving toward the min limit
-      }
-      else 
-      {
-        joints[i]->runSpeed();
-      }
-    }
     }
   }
 }

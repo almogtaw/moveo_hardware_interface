@@ -24,7 +24,11 @@ hardware_interface::CallbackReturn MoveoHardwareInterface::on_init(const hardwar
   }
 
   RCLCPP_INFO(rclcpp::get_logger("MoveoHardwareInterface"), "Moveo hardware interface initialized with joint names.");
-
+  // for (size_t i = 0; i < joint_names_.size(); ++i)
+  // {
+  //   RCLCPP_INFO(rclcpp::get_logger("MoveoHardwareInterface"), "Joint name: %s", joint_names_[i].c_str());
+  // }
+  
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
@@ -82,7 +86,7 @@ std::vector<hardware_interface::CommandInterface> MoveoHardwareInterface::export
   return command_interfaces;
 }
 
-hardware_interface::return_type MoveoHardwareInterface::read(const rclcpp::Time &, const rclcpp::Duration &)
+hardware_interface::return_type MoveoHardwareInterface::read(const rclcpp::Time &, const rclcpp::Duration & period)
 {
   if (!arduino_.isConnected())
   {
@@ -95,6 +99,18 @@ hardware_interface::return_type MoveoHardwareInterface::read(const rclcpp::Time 
   {
     RCLCPP_ERROR(rclcpp::get_logger("MoveoHardwareInterface"), "Error reading states from Arduino.");
     return hardware_interface::return_type::ERROR;
+  }
+
+  double delta_seconds = period.seconds();
+
+  for (size_t i = 0; i < joint_names_.size(); ++i)
+  {
+    double pos_prev = joints[i].pos;
+    joints[i].steps = position_states_[i];
+    joints[i].pos = joints[i].stepsToRadians();
+    joints[i].vel = (joints[i].pos - pos_prev) / delta_seconds;
+
+    velocity_states_[i] = joints[i].vel;
   }
 
   return hardware_interface::return_type::OK;
@@ -113,6 +129,12 @@ hardware_interface::return_type MoveoHardwareInterface::write(const rclcpp::Time
   {
     RCLCPP_ERROR(rclcpp::get_logger("MoveoHardwareInterface"), "Error sending commands to Arduino.");
     return hardware_interface::return_type::ERROR;
+  }
+
+  for (size_t i = 0; i < joint_names_.size(); ++i)
+  {
+    RCLCPP_INFO(rclcpp::get_logger("MoveoHardwareInterface"), 
+                "write - %s: position %f, velocity %f", joint_names_[i].c_str(), position_commands_[i], velocity_commands_[i]);
   }
 
   return hardware_interface::return_type::OK;

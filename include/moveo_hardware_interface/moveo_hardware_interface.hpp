@@ -9,6 +9,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "moveo_hardware_interface/visibility_control.h"
 #include "moveo_hardware_interface/arduino_comm.hpp"
+#include "moveo_hardware_interface/joint.hpp"
 
 namespace moveo_hardware_interface
 {
@@ -61,6 +62,7 @@ private:
   std::vector<double> velocity_states_;
 
   ArduinoComm arduino_;  // Arduino communication object
+  std::vector<Joint> joints;
 };
 
 }  // namespace moveo_hardware_interface

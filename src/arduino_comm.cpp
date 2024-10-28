@@ -20,7 +20,7 @@ ArduinoComm::~ArduinoComm()
 int ArduinoComm::connect()
 {
   try {
-      serial_conn_.Open("/dev/ttyUSB0");
+      serial_conn_.Open("/dev/ttyUSB2");
       serial_conn_.SetBaudRate(LibSerial::BaudRate::BAUD_115200);
       serial_conn_.FlushIOBuffers();  // Clear old data
       std::this_thread::sleep_for(std::chrono::seconds(2));
@@ -73,13 +73,13 @@ int ArduinoComm::sendCommands(const std::vector<double>& positions, const std::v
   for (size_t i = 0; i < positions.size(); ++i) 
   {
     // Convert radians to steps
-    long position_steps = static_cast<long>(positions[i] * steps_per_rad[i]);
-    long velocity_steps = static_cast<long>(velocities[i] * steps_per_rad[i]);
+    // long position_steps = static_cast<long>(positions[i] * steps_per_rad[i]);
+    // long velocity_steps = static_cast<long>(velocities[i] * steps_per_rad[i]);
 
     // Create command for each joint
     std::stringstream command;
-    command << "Joint_" << (i + 1) << " position " << position_steps
-            << " velocity " << velocity_steps << "\n";
+    command << "Joint_" << (i + 1) << " position " << positions[i]
+            << " velocity " << velocities[i] << "\n";
 
     // std::cout << "[sendCommands] sending command: " << command.str() << std::endl;
 
@@ -126,8 +126,10 @@ int ArduinoComm::readStates(std::vector<double>& positions, std::vector<double>&
     ss >> joint_name >> curr_pos_str >> curr_pos_steps >> curr_vel_str >> curr_vel_steps;
     if (curr_pos_str == "curr_pos" && curr_vel_str == "curr_vel") 
     {
-      positions[i] = static_cast<double>(curr_pos_steps) / steps_per_rad[i];
-      velocities[i] = static_cast<double>(curr_vel_steps) / steps_per_rad[i];
+      // positions[i] = static_cast<double>(curr_pos_steps) / steps_per_rad[i];
+      // velocities[i] = static_cast<double>(curr_vel_steps) / steps_per_rad[i];
+      positions[i] = curr_pos_steps;
+      velocities[i] = curr_vel_steps;
     } 
     else 
     {
