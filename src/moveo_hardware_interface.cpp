@@ -18,9 +18,13 @@ hardware_interface::CallbackReturn MoveoHardwareInterface::on_init(const hardwar
   position_states_.resize(system_info.joints.size(), 0.0);
   velocity_states_.resize(system_info.joints.size(), 0.0);
 
+  joints.clear();  // Ensure `joints` is empty before adding
+
   for (const auto & joint : system_info.joints)
   {
     joint_names_.push_back(joint.name);
+    // Initialize each Joint object with name and steps_per_rad
+    joints.emplace_back(Joint(joint.name, 1500.0));
   }
 
   RCLCPP_INFO(rclcpp::get_logger("MoveoHardwareInterface"), "Moveo hardware interface initialized with joint names.");
@@ -107,10 +111,18 @@ hardware_interface::return_type MoveoHardwareInterface::read(const rclcpp::Time 
   {
     double pos_prev = joints[i].pos;
     joints[i].steps = position_states_[i];
-    joints[i].pos = joints[i].stepsToRadians();
+    joints[i].pos = joints[i].stepsToRadians();  // Convert steps to radians
     joints[i].vel = (joints[i].pos - pos_prev) / delta_seconds;
 
+    // Update state vectors
+    position_states_[i] = joints[i].pos;
     velocity_states_[i] = joints[i].vel;
+  }
+
+  for (size_t i = 0; i < joint_names_.size(); ++i)
+  {
+    RCLCPP_INFO(rclcpp::get_logger("MoveoHardwareInterface"), 
+                "read - %s: position %f, velocity %f", joint_names_[i].c_str(), position_states_[i], velocity_states_[i]);
   }
 
   return hardware_interface::return_type::OK;
@@ -124,18 +136,38 @@ hardware_interface::return_type MoveoHardwareInterface::write(const rclcpp::Time
     return hardware_interface::return_type::ERROR;
   }
 
-  // Send position and velocity commands to Arduino
-  if (arduino_.sendCommands(position_commands_, velocity_commands_) != 0)
+  // Convert position and velocity commands from radians to steps
+  std::vector<int> step_positions(joint_names_.size());
+  std::vector<int> step_velocities(joint_names_.size());
+
+  for (size_t i = 0; i < joint_names_.size(); ++i)
+  {
+    // Convert each command to steps using the joint-specific conversion factor
+    step_positions[i] = joints[i].radiansToSteps(position_commands_[i]);
+    step_velocities[i] = joints[i].radiansToSteps(velocity_commands_[i]);
+
+    RCLCPP_INFO(rclcpp::get_logger("MoveoHardwareInterface"), 
+                "write - %s: position (rad) %f -> (steps) %d, velocity (rad/s) %f -> (steps/s) %d",
+                joint_names_[i].c_str(), position_commands_[i], step_positions[i],
+                velocity_commands_[i], step_velocities[i]);
+  }
+
+  // Convert to std::vector<double> for compatibility with sendCommands
+  std::vector<double> double_step_positions(step_positions.begin(), step_positions.end());
+  std::vector<double> double_step_velocities(step_velocities.begin(), step_velocities.end());
+
+  // Send converted positions and velocities to Arduino
+  if (arduino_.sendCommands(double_step_positions, double_step_velocities) != 0)
   {
     RCLCPP_ERROR(rclcpp::get_logger("MoveoHardwareInterface"), "Error sending commands to Arduino.");
     return hardware_interface::return_type::ERROR;
   }
 
-  for (size_t i = 0; i < joint_names_.size(); ++i)
-  {
-    RCLCPP_INFO(rclcpp::get_logger("MoveoHardwareInterface"), 
-                "write - %s: position %f, velocity %f", joint_names_[i].c_str(), position_commands_[i], velocity_commands_[i]);
-  }
+  // for (size_t i = 0; i < joint_names_.size(); ++i)
+  // {
+  //   RCLCPP_INFO(rclcpp::get_logger("MoveoHardwareInterface"), 
+  //               "write - %s: position %f, velocity %f", joint_names_[i].c_str(), position_commands_[i], velocity_commands_[i]);
+  // }
 
   return hardware_interface::return_type::OK;
 }

@@ -31,6 +31,12 @@ public:
     void setVelocityFromSteps(int step_velocity) {
         vel = step_velocity / steps_per_rad;  // Update velocity in radians/sec
     }
+
+    // Convert radians to steps
+    int radiansToSteps(double radians) const
+    {
+        return static_cast<int>(radians * steps_per_rad);
+    }
 };
 
 #endif // JOINT_HPP

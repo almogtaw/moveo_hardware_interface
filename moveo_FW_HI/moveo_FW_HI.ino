@@ -64,11 +64,11 @@ struct joint_parameters
 };
 
 // Initialize each joint with tested parameters:
-joint_parameters joint1_param(-1000, 1000, 1500.0, 1500.0, 500.0, 0.0, 10000.0, 500.0, 1.0);
-joint_parameters joint2_param(-1000, 1000, 750.0, 750.0, 500.0, 0.0, 1000.0, 500.0, 1.0);
-joint_parameters joint3_param(-1000, 1000, 2000.0, 2000.0, 500.0, 0.0, 10000.0, 500.0, 1.0);
+joint_parameters joint1_param(-10000, 10000, 1500.0, 1500.0, 500.0, 0.0, 10000.0, 500.0, 1.0);
+joint_parameters joint2_param(-10000, 10000, 750.0, 750.0, 500.0, 0.0, 1000.0, 500.0, 1.0);
+joint_parameters joint3_param(-10000, 10000, 2000.0, 2000.0, 500.0, 0.0, 10000.0, 500.0, 1.0);
 joint_parameters joint4_param;  // inactive joint - all values initialize to zero in the constructor
-joint_parameters joint5_param(-1000, 1000, 1000.0, 1000.0, 500.0, 0.0, 5000.0, 500.0, 1.0);
+joint_parameters joint5_param(-10000, 10000, 1000.0, 1000.0, 500.0, 0.0, 5000.0, 500.0, 1.0);
 
 // Create an array of pointers to the instances
 joint_parameters* joints_params[] = {&joint1_param, &joint2_param, &joint3_param, &joint4_param, &joint5_param};
@@ -253,12 +253,12 @@ void loop()
       {
         long current_position = joints[i]->currentPosition();
         float current_velocity = joints[i]->speed();
-        Serial.print("Joint: ");
-        Serial.print(i + 1);
-        Serial.print(" -> position: ");
-        Serial.print(current_position);
-        Serial.print(", speed: ");
-        Serial.println(current_velocity);
+        // Serial.print("Joint: ");
+        // Serial.print(i + 1);
+        // Serial.print(" -> position: ");
+        // Serial.print(current_position);
+        // Serial.print(", speed: ");
+        // Serial.println(current_velocity);
       }
     } 
     else 
@@ -270,24 +270,24 @@ void loop()
         float current_velocity = joints[i]->speed();
 
         float deceleration = joints_params[i]->max_accel;
-        Serial.print("Joint: ");
-        Serial.print(i + 1);
-        Serial.print(" -> position: ");
-        Serial.print(current_position);
-        Serial.print(", speed: ");
-        Serial.print(current_velocity);
-        Serial.print(", max accel: ");
-        Serial.print(deceleration);
+        // Serial.print("Joint: ");
+        // Serial.print(i + 1);
+        // Serial.print(" -> position: ");
+        // Serial.print(current_position);
+        // Serial.print(", speed: ");
+        // Serial.print(current_velocity);
+        // Serial.print(", max accel: ");
+        // Serial.print(deceleration);
 
         // Calculate stopping distance: d = v^2 / (2 * a)
         long stopping_distance = (current_velocity * current_velocity) / (2 * deceleration);
-        Serial.print(", stopping distance: ");
-        Serial.println(stopping_distance);
+        // Serial.print(", stopping distance: ");
+        // Serial.println(stopping_distance);
 
         // Check if moving toward max limit and will exceed it
         if (current_velocity > 0 && (current_position + stopping_distance) >= joints_params[i]->max_travel) 
         {
-          Serial.println("stopping motor!");
+          // Serial.println("stopping motor!");
           joints[i]->moveTo(joints_params[i]->max_travel);
           is_position_control = true;
           // joints[i]->stop();  // Smoothly stop the motor if moving toward the max limit
@@ -295,7 +295,7 @@ void loop()
         // Check if moving toward min limit and will exceed it
         else if (current_velocity < 0 && (current_position - stopping_distance) <= joints_params[i]->min_travel) 
         {
-          Serial.println("stopping motor!");
+          // Serial.println("stopping motor!");
           joints[i]->moveTo(joints_params[i]->min_travel);
           is_position_control = true;
           // joints[i]->stop();  // Smoothly stop the motor if moving toward the min limit

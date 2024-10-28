@@ -19,14 +19,17 @@ ArduinoComm::~ArduinoComm()
 
 int ArduinoComm::connect()
 {
-  try {
-      serial_conn_.Open("/dev/ttyUSB2");
+  try 
+  {
+      serial_conn_.Open("/dev/ttyACM0");
       serial_conn_.SetBaudRate(LibSerial::BaudRate::BAUD_115200);
       serial_conn_.FlushIOBuffers();  // Clear old data
       std::this_thread::sleep_for(std::chrono::seconds(2));
       std::cout << "Serial connection established!" << std::endl;
       return 0;
-  } catch (const LibSerial::OpenFailed&) {
+  } 
+  catch (const LibSerial::OpenFailed&) 
+  {
       std::cerr << "Failed to open serial device " << std::endl;
       return -1;
   }
