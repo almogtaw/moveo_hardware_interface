@@ -261,7 +261,7 @@ void loop()
         // Serial.println(current_velocity);
       }
     } 
-    else 
+    else // velocity control
     {
       // Only proceed if the motor is active
       if (joints[i]->isRunning()) 

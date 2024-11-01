@@ -11,10 +11,11 @@ public:
     double pos;  // Position in radians
     double vel;  // Velocity in radians/sec
     float steps_per_rad;
+    bool is_position_control;
 
     // Constructor
     Joint(const std::string& joint_name, float steps_per_rad = 1500.0)
-        : name(joint_name), steps(0), pos(0.0), vel(0.0), steps_per_rad(steps_per_rad) {}
+        : name(joint_name), steps(0), pos(0.0), vel(0.0), steps_per_rad(steps_per_rad), is_position_control(true) {}
 
     // Method to convert steps to radians
     double stepsToRadians() const {

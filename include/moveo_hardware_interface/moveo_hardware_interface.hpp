@@ -47,6 +47,17 @@ public:
   export_command_interfaces() override;
 
   MOVEO_HARDWARE_INTERFACE_PUBLIC
+  hardware_interface::return_type prepare_command_mode_switch(
+    const std::vector<std::string> & start_interfaces,
+    const std::vector<std::string> & stop_interfaces) override;
+
+  MOVEO_HARDWARE_INTERFACE_PUBLIC
+  hardware_interface::return_type perform_command_mode_switch(
+    const std::vector<std::string> & start_interfaces,
+    const std::vector<std::string> & stop_interfaces) override;
+
+
+  MOVEO_HARDWARE_INTERFACE_PUBLIC
   hardware_interface::return_type 
   read(const rclcpp::Time & time, const rclcpp::Duration & period) override;
 

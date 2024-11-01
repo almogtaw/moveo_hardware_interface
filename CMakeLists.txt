@@ -19,7 +19,6 @@ foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
   find_package(${Dependency} REQUIRED)
 endforeach()
 
-
 ## COMPILE
 add_library(
   moveo_hardware_interface
@@ -68,15 +67,15 @@ install(TARGETS moveo_hardware_interface
 )
 
 # Additional setup for the test_arduino_comm executable
-add_executable(test_arduino_comm test/test_arduino_comm.cpp src/arduino_comm.cpp)
+# add_executable(test_arduino_comm test/test_arduino_comm.cpp src/arduino_comm.cpp)
 
-target_include_directories(test_arduino_comm PRIVATE include)
-target_link_libraries(test_arduino_comm serial)
+# target_include_directories(test_arduino_comm PRIVATE include)
+# target_link_libraries(test_arduino_comm serial)
 
-# Install the test binary
-install(TARGETS test_arduino_comm
-  DESTINATION lib/${PROJECT_NAME}
-)
+# # Install the test binary
+# install(TARGETS test_arduino_comm
+#   DESTINATION lib/${PROJECT_NAME}
+# )
 
 
 if(BUILD_TESTING)
