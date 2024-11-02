@@ -20,18 +20,28 @@ namespace moveo_hardware_interface
 
     joints.clear(); // Ensure `joints` is empty before adding
 
-    for (const auto &joint : system_info.joints)
+    for (size_t i = 0; i < system_info.joints.size(); ++i)
     {
-      joint_names_.push_back(joint.name);
-      // Initialize each Joint object with name and steps_per_rad
-      joints.emplace_back(Joint(joint.name, 1500.0));
+        const auto &joint_name = system_info.joints[i].name;
+        joint_names_.push_back(joint_name);
+
+        // Set specific steps-per-radian values based on joint index
+        float steps_per_rad = 1500.0;  // Default value
+
+        if (joint_name == "Joint_1")
+            steps_per_rad = 7162;
+        else if (joint_name == "Joint_2")
+            steps_per_rad = 3756;
+        else if (joint_name == "Joint_3")
+            steps_per_rad = 697;
+        else if (joint_name == "Joint_5")
+            steps_per_rad = 2228;
+
+        // Initialize each Joint object with name and specific steps_per_rad
+        joints.emplace_back(Joint(joint_name, steps_per_rad));
     }
 
     RCLCPP_INFO(rclcpp::get_logger("MoveoHardwareInterface"), "Moveo hardware interface initialized with joint names.");
-    // for (size_t i = 0; i < joint_names_.size(); ++i)
-    // {
-    //   RCLCPP_INFO(rclcpp::get_logger("MoveoHardwareInterface"), "Joint name: %s", joint_names_[i].c_str());
-    // }
 
     return hardware_interface::CallbackReturn::SUCCESS;
   }

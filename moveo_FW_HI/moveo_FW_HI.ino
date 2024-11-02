@@ -53,22 +53,20 @@ struct joint_parameters
   float min_vel;        // [steps/sec]
   float max_vel;        // [steps/sec]
   float default_vel;    // [steps/sec]
-  float min_accel;      // [steps/sec^2]
   float max_accel;      // [steps/sec^2]
   float default_accel;  // [steps/sec^2]
-  float steps_per_deg;  // [steps/deg]
 
   // Constructor to initialize the values
-  joint_parameters(long mt = 0, long mxt = 0, float miv = 0.0, float mav = 0.0, float dv = 0.0, float mia = 0.0, float maa = 0.0, float da = 0.0, float spd = 0.0)
-    : min_travel(mt), max_travel(mxt), min_vel(miv), max_vel(mav), default_vel(dv), min_accel(mia), max_accel(maa), default_accel(da), steps_per_deg(spd) {}
+  joint_parameters(long mt = 0, long mxt = 0, float miv = 0.0, float mav = 0.0, float dv = 0.0, float maa = 0.0, float da = 0.0)
+    : min_travel(mt), max_travel(mxt), min_vel(miv), max_vel(mav), default_vel(dv), max_accel(maa), default_accel(da) {}
 };
 
 // Initialize each joint with tested parameters:
-joint_parameters joint1_param(-10000, 10000, 1500.0, 1500.0, 500.0, 0.0, 10000.0, 500.0, 1.0);
-joint_parameters joint2_param(-10000, 10000, 750.0, 750.0, 500.0, 0.0, 1000.0, 500.0, 1.0);
-joint_parameters joint3_param(-10000, 10000, 2000.0, 2000.0, 500.0, 0.0, 10000.0, 500.0, 1.0);
+joint_parameters joint1_param(-25000, 3000, -40000.0, 40000.0, 40000.0, 40000.0, 40000.0);
+joint_parameters joint2_param(-6100, 7000, -60000.0, 60000.0, 30000.0, 50000.0, 50000.0);
+joint_parameters joint3_param(-1500, 1500, -1000.0, 1000.0, 700.0, 10000.0, 10000.0);
 joint_parameters joint4_param;  // inactive joint - all values initialize to zero in the constructor
-joint_parameters joint5_param(-10000, 10000, 1000.0, 1000.0, 500.0, 0.0, 5000.0, 500.0, 1.0);
+joint_parameters joint5_param(-4200, 3500, -4000.0, 4000.0, 2500.0, 5000.0, 5000.0);
 
 // Create an array of pointers to the instances
 joint_parameters* joints_params[] = {&joint1_param, &joint2_param, &joint3_param, &joint4_param, &joint5_param};
@@ -166,6 +164,7 @@ void loop()
         position = constrain(position, joints_params[joint_index]->min_travel, joints_params[joint_index]->max_travel);
 
         // Need to add default velocity here - in case the previous setMaxSpeed not in the desired value
+        joints[joint_index]->setMaxSpeed(joints_params[joint_index]->default_vel);
         joints[joint_index]->moveTo(position);
         is_position_control = true;
 
@@ -249,62 +248,10 @@ void loop()
     if (is_position_control) 
     {
       joints[i]->run();
-      if (joints[i]->isRunning()) 
-      {
-        long current_position = joints[i]->currentPosition();
-        float current_velocity = joints[i]->speed();
-        // Serial.print("Joint: ");
-        // Serial.print(i + 1);
-        // Serial.print(" -> position: ");
-        // Serial.print(current_position);
-        // Serial.print(", speed: ");
-        // Serial.println(current_velocity);
-      }
     } 
     else // velocity control
     {
-      // Only proceed if the motor is active
-      if (joints[i]->isRunning()) 
-      {
-        long current_position = joints[i]->currentPosition();
-        float current_velocity = joints[i]->speed();
-
-        float deceleration = joints_params[i]->max_accel;
-        // Serial.print("Joint: ");
-        // Serial.print(i + 1);
-        // Serial.print(" -> position: ");
-        // Serial.print(current_position);
-        // Serial.print(", speed: ");
-        // Serial.print(current_velocity);
-        // Serial.print(", max accel: ");
-        // Serial.print(deceleration);
-
-        // Calculate stopping distance: d = v^2 / (2 * a)
-        long stopping_distance = (current_velocity * current_velocity) / (2 * deceleration);
-        // Serial.print(", stopping distance: ");
-        // Serial.println(stopping_distance);
-
-        // Check if moving toward max limit and will exceed it
-        if (current_velocity > 0 && (current_position + stopping_distance) >= joints_params[i]->max_travel) 
-        {
-          // Serial.println("stopping motor!");
-          joints[i]->moveTo(joints_params[i]->max_travel);
-          is_position_control = true;
-          // joints[i]->stop();  // Smoothly stop the motor if moving toward the max limit
-        }
-        // Check if moving toward min limit and will exceed it
-        else if (current_velocity < 0 && (current_position - stopping_distance) <= joints_params[i]->min_travel) 
-        {
-          // Serial.println("stopping motor!");
-          joints[i]->moveTo(joints_params[i]->min_travel);
-          is_position_control = true;
-          // joints[i]->stop();  // Smoothly stop the motor if moving toward the min limit
-        }
-        else 
-        {
-          joints[i]->runSpeed();
-        }
-      }
+      joints[i]->runSpeed();
     }
   }
 }
