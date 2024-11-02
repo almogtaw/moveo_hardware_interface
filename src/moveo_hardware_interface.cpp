@@ -165,7 +165,7 @@ namespace moveo_hardware_interface
       velocity_states_[i] = joints[i].vel;
 
       RCLCPP_INFO(rclcpp::get_logger("MoveoHardwareInterface"),
-                  "read - %s: position %f, prev pos: %f, period: %f velocity %f", joint_names_[i].c_str(), position_states_[i], pos_prev, delta_seconds * 1e10, velocity_states_[i]);
+                  "read - %s: position %f, velocity %f", joint_names_[i].c_str(), position_states_[i], velocity_states_[i]);
     }
 
     return hardware_interface::return_type::OK;
