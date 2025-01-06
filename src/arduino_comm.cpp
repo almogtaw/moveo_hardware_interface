@@ -21,7 +21,7 @@ int ArduinoComm::connect()
 {
   try 
   {
-      serial_conn_.Open("/dev/ttyACM0");
+      serial_conn_.Open("/dev/ttyUSB0");
       serial_conn_.SetBaudRate(LibSerial::BaudRate::BAUD_115200);
       serial_conn_.FlushIOBuffers();  // Clear old data
       std::this_thread::sleep_for(std::chrono::seconds(2));
@@ -74,7 +74,7 @@ int ArduinoComm::sendCommand(const int joint_num, const long position, const lon
   }
 
   std::stringstream command;
-  command << "Joint_" << (joint_num) << " position " << position << " velocity " << velocity << "\n";
+  command << "Joint_" << (joint_num) << " position " << position << "\n"; //" velocity " << velocity << "\n";
 
   // Send command and check response
   auto response = send_msg(command.str());
