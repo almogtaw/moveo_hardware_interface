@@ -21,7 +21,7 @@ int ArduinoComm::connect()
 {
   try 
   {
-      serial_conn_.Open("/dev/ttyUSB0");
+      serial_conn_.Open("/dev/arduino");
       serial_conn_.SetBaudRate(LibSerial::BaudRate::BAUD_115200);
       serial_conn_.FlushIOBuffers();  // Clear old data
       std::this_thread::sleep_for(std::chrono::seconds(2));
