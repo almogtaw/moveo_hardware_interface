@@ -174,8 +174,8 @@ namespace moveo_hardware_interface
       position_states_[i] = joints[i].pos;
       velocity_states_[i] = joints[i].vel;
 
-      RCLCPP_INFO(rclcpp::get_logger("MoveoHardwareInterface"),
-                  "read - %s: position %f, velocity %f", joint_names_[i].c_str(), position_states_[i], velocity_states_[i]);
+      // RCLCPP_INFO(rclcpp::get_logger("MoveoHardwareInterface"),
+      //             "read - %s: position %f, velocity %f", joint_names_[i].c_str(), position_states_[i], velocity_states_[i]);
     }
 
     return hardware_interface::return_type::OK;
@@ -208,9 +208,9 @@ namespace moveo_hardware_interface
       if (joints[i].is_position_control)
       {
         // Send position command (with optional velocity) for this joint:
-        RCLCPP_INFO(rclcpp::get_logger("MoveoHardwareInterface"),
-                    "sending position command to arduino: %s: pos: %f, vel: %f",
-                    joint_names_[i].c_str(), position_commands_[i], velocity_commands_[i]);
+        // RCLCPP_INFO(rclcpp::get_logger("MoveoHardwareInterface"),
+        //             "sending position command to arduino: %s: pos: %f, vel: %f",
+        //             joint_names_[i].c_str(), position_commands_[i], velocity_commands_[i]);
 
         if (arduino_.sendCommand(i + 1, step_positions[i], step_velocities[i]) != 0)
         {
@@ -221,9 +221,9 @@ namespace moveo_hardware_interface
       else
       {
         // Send velocity command for this joint:
-        RCLCPP_INFO(rclcpp::get_logger("MoveoHardwareInterface"),
-                    "sending velocity command to arduino: %s: vel: %f",
-                    joint_names_[i].c_str(), velocity_commands_[i]);
+        // RCLCPP_INFO(rclcpp::get_logger("MoveoHardwareInterface"),
+        //             "sending velocity command to arduino: %s: vel: %f",
+        //             joint_names_[i].c_str(), velocity_commands_[i]);
 
         if (arduino_.sendCommand(i + 1, step_velocities[i]) != 0)
         {

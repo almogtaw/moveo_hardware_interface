@@ -73,6 +73,8 @@ int ArduinoComm::sendCommand(const int joint_num, const long position, const lon
     return -1;  // Error code for not connected
   }
 
+  (void)velocity;  // Suppress unused variable warning
+
   std::stringstream command;
   command << "Joint_" << (joint_num) << " position " << position << "\n"; //" velocity " << velocity << "\n";
 
